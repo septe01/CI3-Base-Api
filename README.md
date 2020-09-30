@@ -1,4 +1,5 @@
 # ci-restserver
-Check the recent version at https://github.com/chriskacerguis/codeigniter-restserver
 
-My alternate version https://github.com/ardisaurus/old-rest-ci
+git clone https://github.com/septe01/CI3-Base-Api.git
+
+example : base-url/api/example/users

@@ -9,17 +9,6 @@ require APPPATH . '/libraries/REST_Controller.php';
 // use namespace
 use Restserver\Libraries\REST_Controller;
 
-/**
- * This is an example of a few basic user interaction methods you could use
- * all done with a hardcoded array
- *
- * @package         CodeIgniter
- * @subpackage      Rest Server
- * @category        Controller
- * @author          Phil Sturgeon, Chris Kacerguis
- * @license         MIT
- * @link            https://github.com/chriskacerguis/codeigniter-restserver
- */
 class Report extends REST_Controller {
 
     function __construct()
@@ -27,12 +16,83 @@ class Report extends REST_Controller {
         // Construct the parent class
         parent::__construct();
 
+        // load model report
+        
+        $this->load->model('MReport');        
+
         // Configure limits on our controller methods
         // Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
+        $this->methods['index_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['show_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['create_post']['limit'] = 500; // 500 requests per hour per user/key
+
         $this->methods['users_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['users_post']['limit'] = 100; // 100 requests per hour per user/key
         $this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
     }
+
+    public function index_get(){
+        echo "hello septe";
+    }
+
+    public function show_get(){ //get all data
+        $data_report = $this->MReport->getData();
+        if($data_report->num_rows() > 0){
+            $res_data = [
+                "status"=> true,
+                "message"=> "data ready ",
+                "data"=> $data_report->result()
+            ];
+        }else{
+            $res_data = [
+                "status"=> true,
+                "message"=> "data is empty",
+                "data"=>[]
+            ];
+        }
+        $this->response($res_data, REST_Controller::HTTP_OK);
+    }
+
+    public function create_post(){ //create data
+
+        $config['upload_path']          = './uploads/';
+        $config['allowed_types']        = 'gif|jpg|png';
+        $config['file_name']        = 'NC-'.time();
+        $config['max_size']             = 2048;
+
+        $this->load->library('upload', $config);
+
+        if ( ! $this->upload->do_upload('log_file'))
+        {
+                $res_data = array('error' => $this->upload->display_errors());
+        }else
+        {
+                $data = [
+                    "crq" => $this->input->post('crq'),
+                    "requester" =>	$this->input->post('requester'),
+                    "status" => $this->input->post('status'),
+                    "log_file"	=> $this->upload->data('file_name'),
+                ];
+                $store_data = $this->MReport->insertData($data);
+                if($store_data){
+                    $res_data = [
+                        "status"=> true,
+                        "message"=> "success insert data!",
+                    ];
+                }else{
+                    $res_data = [
+                        "status"=> true,
+                        "message"=> "failed insert data!",
+                    ];
+                }
+        }
+
+        $this->response($res_data, REST_Controller::HTTP_OK);
+    }
+
+
+
+
 
     public function users_get()
     {
