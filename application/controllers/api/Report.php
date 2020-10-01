@@ -1,4 +1,6 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: GET, OPTIONS");
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -54,6 +56,8 @@ class Report extends REST_Controller {
     }
 
     public function create_post(){ //create data
+        
+
 
         $config['upload_path']          = './uploads/';
         $config['allowed_types']        = 'gif|jpg|png';
@@ -87,7 +91,8 @@ class Report extends REST_Controller {
                 }
         }
 
-        $this->response($res_data, REST_Controller::HTTP_OK);
+        $this->response($this->input->post('requester'), REST_Controller::HTTP_OK);
+        // $this->response($res_data, REST_Controller::HTTP_OK);
     }
 
 
